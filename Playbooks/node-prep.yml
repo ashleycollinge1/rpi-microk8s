@@ -1,0 +1,36 @@
+---
+  - name: Node Preparation
+    hosts: microk8s-nodes
+    become: yes
+    tasks:
+      - name: Update the system
+        apt:
+          name: *
+          state: latest
+      - name: enable c state groups
+          replace:
+            path: cmdline.txt
+            regexp: '^([\w](?!.*\b{{ item }}\b).*)$'
+            replace: '\1 {{ item }}'
+        with_items:
+        - "cgroup_memory=1"
+        - "cgroup_enable=memory"
+      - name: Reboot the RPi
+        become: yes
+        shell: "sleep 5 && reboot"
+        async: 1
+        poll: 0
+      - name: Wait for reboot
+        wait_for_connection:
+          connection_timeout: 10
+          sleep: 5
+          delay: 5
+          timeout: 300
+      - name: Add IP address of all hosts to all hosts
+        lineinfile:
+          dest: /etc/hosts
+            regexp: '.*{{ item }}$'
+            line: "{{ hostvars[item].ansible_host }} {{item}}"
+          state: present
+        when: hostvars[item].ansible_host is defined
+        with_items: "{{ groups.all }}"
