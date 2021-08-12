@@ -1,0 +1,11 @@
+all:
+  microk8s-nodes:
+    rpi1.core.local:
+      ansible_user: pi
+      ansible_host: 192.168.1.51
+    rpi2.core.local:
+      ansible_user: pi
+      ansible_host: 192.168.1.52
+    rpi3.core.local:
+      ansible_user: pi
+      ansible_host: 192.168.1.53
