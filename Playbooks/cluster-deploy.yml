@@ -1,0 +1,10 @@
+---
+  - name: Install MicroK8s
+    snap:
+      name: microk8s
+      classic: yes
+  - name: Enable K8s Dashboard
+    shell: "source /etc/profile.d/apps-bin-path.sh && /snap/bin/microk8s.enable dashboard"
+    when: k8s_dashboard|default(False)|bool == True
+    args:
+      executable: /bin/bash
