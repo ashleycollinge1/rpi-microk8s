@@ -5,13 +5,13 @@
     tasks:
       - name: Update the system
         apt:
-          name: *
+          name: "*"
           state: latest
       - name: enable c state groups
-          replace:
-            path: cmdline.txt
-            regexp: '^([\w](?!.*\b{{ item }}\b).*)$'
-            replace: '\1 {{ item }}'
+        replace:
+          path: cmdline.txt
+          regexp: '^([\w](?!.*\b{{ item }}\b).*)$'
+          replace: '\1 {{ item }}'
         with_items:
         - "cgroup_memory=1"
         - "cgroup_enable=memory"
@@ -29,8 +29,18 @@
       - name: Add IP address of all hosts to all hosts
         lineinfile:
           dest: /etc/hosts
-            regexp: '.*{{ item }}$'
-            line: "{{ hostvars[item].ansible_host }} {{item}}"
+          regexp: ".*{{ item }}$"
+          line: "{{ hostvars[item].ansible_host }} {{item}}"
           state: present
         when: hostvars[item].ansible_host is defined
-        with_items: "{{ groups.all }}"
+        with_items:
+          - "{{ groups.all }}"
+      - name: Install MicroK8s
+        snap:
+          name: microk8s
+          classic: yes
+      - name: Enable K8s Dashboard
+        shell: "source /etc/profile.d/apps-bin-path.sh && /snap/bin/microk8s.enable dashboard"
+        when: k8s_dashboard|default(False)|bool == True
+        args:
+          executable: /bin/bash
